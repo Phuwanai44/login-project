@@ -97,7 +97,6 @@ func Login(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	// find user by email
 	err := config.UserCollection.FindOne(
 		ctx,
 		bson.M{"email": input.Email},
@@ -110,7 +109,6 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	// compare password
 	err = bcrypt.CompareHashAndPassword(
 		[]byte(user.Password),
 		[]byte(input.Password),
@@ -123,18 +121,16 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	// create JWT
 	claims := jwt.MapClaims{
-		"email": user.Email,
-		"role":  user.Role,
-		"exp":   time.Now().Add(time.Hour * 24).Unix(),
+		"user_id": user.ID.Hex(),
+		"email":   user.Email,
+		"role":    user.Role,
+		"exp":     time.Now().Add(time.Hour * 24).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	secret := os.Getenv("JWT_SECRET")
-
-	tokenString, err := token.SignedString([]byte(secret))
+	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -146,6 +142,11 @@ func Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "login success",
 		"token":   tokenString,
-		"role":    user.Role,
+		"user": gin.H{
+			"id":    user.ID.Hex(),
+			"name":  user.Name,
+			"email": user.Email,
+			"role":  user.Role,
+		},
 	})
 }

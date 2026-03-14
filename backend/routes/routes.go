@@ -16,7 +16,8 @@ func SetupRoutes(r *gin.Engine) {
 	auth := r.Group("/")
 	auth.Use(middleware.AuthMiddleware())
 	{
-		auth.GET("/profile", controllers.Profile)
+		auth.GET("/profile", controllers.GetProfile)
+		auth.PUT("/profile", controllers.UpdateProfile)
 	}
 
 	// admin routes
@@ -25,5 +26,6 @@ func SetupRoutes(r *gin.Engine) {
 	admin.Use(middleware.AdminOnly())
 	{
 		admin.GET("/users", controllers.GetUsers)
+		admin.DELETE("/users/:id", controllers.DeleteUser) //
 	}
 }

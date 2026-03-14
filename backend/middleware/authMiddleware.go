@@ -22,10 +22,9 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Bearer TOKEN
-		tokenString := strings.Split(authHeader, " ")
+		parts := strings.Split(authHeader, " ")
 
-		if len(tokenString) != 2 {
+		if len(parts) != 2 {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error": "invalid token format",
 			})
@@ -33,7 +32,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		token, err := jwt.Parse(tokenString[1], func(token *jwt.Token) (interface{}, error) {
+		token, err := jwt.Parse(parts[1], func(token *jwt.Token) (interface{}, error) {
 			return []byte(os.Getenv("JWT_SECRET")), nil
 		})
 
@@ -47,6 +46,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		claims := token.Claims.(jwt.MapClaims)
 
+		c.Set("user_id", claims["user_id"])
 		c.Set("email", claims["email"])
 		c.Set("role", claims["role"])
 
