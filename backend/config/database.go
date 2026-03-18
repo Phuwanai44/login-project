@@ -10,7 +10,7 @@ import (
 )
 
 var DB *mongo.Database
-var UserCollection *mongo.Collection
+var UserCollection, ProductCollection *mongo.Collection
 
 func ConnectDB() {
 
@@ -27,6 +27,7 @@ func ConnectDB() {
 
 	DB = client.Database("authDB")
 	UserCollection = DB.Collection("users")
+	ProductCollection = DB.Collection("products")
 
 	err = client.Ping(context.TODO(), nil)
 	if err != nil {

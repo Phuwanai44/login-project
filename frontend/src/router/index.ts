@@ -1,77 +1,89 @@
-import { createRouter, createWebHistory } from "vue-router"
+import { createRouter, createWebHistory } from 'vue-router'
 
-import LoginView from "@/views/page/LoginView.vue"
-import RegisterView from "@/views/page/RegisterView.vue"
+import LoginView from '@/views/page/LoginView.vue'
+import RegisterView from '@/views/page/RegisterView.vue'
+import HomeView from '@/views/page/HomeView.vue'
 
-import DashboardLayout from "@/layouts/DashboardLayout.vue"
-import DashboardView from "@/views/page/DashboardView.vue"
-import UserDashboard from "@/views/page/DashboardUser.vue"
-import ProfileDashboard from "@/views/page/DadhboardProfile.vue"
+import DashboardLayout from '@/layouts/DashboardLayout.vue'
+import DashboardView from '@/views/page/DashboardView.vue'
+import UserDashboard from '@/views/page/DashboardUser.vue'
+import ProfileDashboard from '@/views/page/DadhboardProfile.vue'
+import ProductDashboard from '@/views/page/ProductDashboard.vue'
 
 const routes = [
-
   {
-    path: "/login",
-    component: LoginView
+    path: '/',
+    component: HomeView,
   },
 
   {
-    path: "/register",
-    component: RegisterView
+    path: '/login',
+    component: LoginView,
   },
 
   {
-    path: "/dashboard",
+    path: '/register',
+    component: RegisterView,
+  },
+  {
+    path: '/dashboard',
     component: DashboardLayout,
     children: [
       {
-        path: "",
-        component: DashboardView
-      }
-    ]
+        path: '',
+        component: DashboardView,
+      },
+    ],
   },
 
   {
-    path: "/users",
+    path: '/users',
     component: DashboardLayout,
     children: [
       {
-        path: "",
-        component: UserDashboard
-      }
-    ]
+        path: '',
+        component: UserDashboard,
+      },
+    ],
   },
 
   {
-    path: "/profile",
+    path: '/profile',
     component: DashboardLayout,
     children: [
       {
-        path: "",
-        component: ProfileDashboard
-      }
-    ]
-  }
+        path: '',
+        component: ProfileDashboard,
+      },
+    ],
+  },
 
+  {
+    path: '/products',
+    component: DashboardLayout,
+    children: [
+      {
+        path: '',
+        component: ProductDashboard,
+      },
+    ],
+  },
 ]
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
 })
-
 
 // Route Guard (กันเข้า dashboard ถ้าไม่ login)
 router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('token')
 
-  const token = localStorage.getItem("token")
-
-  if (!token && to.path !== "/login" && to.path !== "/register") {
-    next("/login")
+  if (!token && to.path !== '/login' && to.path !== '/register') {
+    next('/login')
   } else {
     next()
   }
-
 })
 
 export default router

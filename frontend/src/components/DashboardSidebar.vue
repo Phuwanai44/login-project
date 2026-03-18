@@ -47,6 +47,13 @@ const emit = defineEmits(["toggleSidebar"])
         </router-link>
       </li>
 
+      <li class="nav-item">
+        <router-link class="nav-link text-white d-flex align-items-center gap-2" to="/products">
+          <span class="icon"></span>
+          <span v-if="isOpen">product</span>
+        </router-link>
+      </li>
+
     </ul>
 
   </div>
