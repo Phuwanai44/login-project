@@ -9,6 +9,7 @@ import DashboardView from '@/views/page/DashboardView.vue'
 import UserDashboard from '@/views/page/DashboardUser.vue'
 import ProfileDashboard from '@/views/page/DadhboardProfile.vue'
 import ProductDashboard from '@/views/page/ProductDashboard.vue'
+import ProductDashboardAdd from '@/views/page/ProductDashboardAdd.vue'
 
 const routes = [
   {
@@ -65,6 +66,17 @@ const routes = [
       {
         path: '',
         component: ProductDashboard,
+      },
+    ],
+  },
+
+  {
+    path: '/add-products',
+    component: DashboardLayout,
+    children: [
+      {
+        path: '',
+        component: ProductDashboardAdd,
       },
     ],
   },

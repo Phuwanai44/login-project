@@ -92,30 +92,53 @@ func CreateProduct(c *gin.Context) {
 
 	var product models.Product
 
+	// bind json
 	if err := c.ShouldBindJSON(&product); err != nil {
-
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
-
 		return
 	}
 
+	// ✅ validation
+	if product.Name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "name is required",
+		})
+		return
+	}
+
+	if product.Price < 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "price must be >= 0",
+		})
+		return
+	}
+
+	if product.Stock < 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "stock must be >= 0",
+		})
+		return
+	}
+
+	// create id
 	product.ID = primitive.NewObjectID()
 
-	_, err := config.ProductCollection.InsertOne(ctx, product)
-
+	// insert
+	result, err := config.ProductCollection.InsertOne(ctx, product)
 	if err != nil {
-
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "cannot create product",
 		})
-
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	// ✅ response กลับไป
+	c.JSON(http.StatusCreated, gin.H{
 		"message": "product created",
+		"id":      result.InsertedID,
+		"data":    product,
 	})
 }
 
