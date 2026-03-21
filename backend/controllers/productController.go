@@ -84,6 +84,40 @@ func GetProducts(c *gin.Context) {
 	})
 }
 
+func GetProductById(c *gin.Context) {
+	id := c.Param("id")
+
+	// แปลง string → ObjectID
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid id",
+		})
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	var product models.Product
+
+	// หา product ตาม id
+	err = config.ProductCollection.FindOne(
+		ctx,
+		bson.M{"_id": objID},
+	).Decode(&product)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "product not found",
+		})
+		return
+	}
+
+	// ส่งข้อมูลกลับ
+	c.JSON(http.StatusOK, product)
+}
+
 // CREATE PRODUCT
 func CreateProduct(c *gin.Context) {
 

@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
 import { ref, onMounted, computed } from "vue"
 import { getProducts, deleteProduct } from "@/services/productService"
 import type { Product, ProductResponse } from "@/types/product"
 
 const products = ref<Product[]>([])
 const loading = ref(true)
+const router = useRouter()
 
 const currentPage = ref(1)
 const totalPages = ref(1)
@@ -32,18 +34,24 @@ const handleSearch = () => {
 }
 
 const handleDelete = async (id: string) => {
-  const confirmDelete = confirm("คุณแน่ใจว่าจะลบสินค้านี้?")
-  if (!confirmDelete) return
+    const confirmDelete = confirm("คุณแน่ใจว่าจะลบสินค้านี้?")
+    if (!confirmDelete) return
 
-  try {
-    await deleteProduct(id)
+    try {
+        await deleteProduct(id)
 
-    // 🔥 ลบออกจาก UI ทันที
-    products.value = products.value.filter(p => p.id !== id)
+        // 🔥 ลบออกจาก UI ทันที
+        products.value = products.value.filter(p => p.id !== id)
 
-  } catch (err) {
-    console.error(err)
-  }
+    } catch (err) {
+        console.error(err)
+    }
+}
+
+const handleEdit = (id: string) => {
+   console.log(products.value[0])
+    console.log('id =', id)
+    router.push(`/products/edit/${id}`)
 }
 
 // 👉 pagination logic (แสดง 5 หน้า)
@@ -136,7 +144,9 @@ onMounted(() => {
                             <td>{{ product.price }}</td>
                             <td>{{ product.stock }}</td>
                             <td>
-                                <button class="btn btn-sm btn-warning me-2">Edit</button>
+                                <button class="btn btn-sm btn-warning me-2" @click="handleEdit(product.id)">
+                                    Edit
+                                </button>
                                 <button class="btn btn-sm btn-danger" @click="handleDelete(product.id)">
                                     Delete
                                 </button>

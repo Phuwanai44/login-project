@@ -11,3 +11,9 @@ export interface ProductResponse {
   totalPages: number
   page: number
 }
+
+export interface ProductPayload {
+  name: string
+  price: number
+  stock: number
+}

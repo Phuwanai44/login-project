@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Product, ProductResponse } from '@/types/product'
+import type { Product, ProductResponse, ProductPayload } from '@/types/product'
 
 export const getProducts = async (page: number, search: string): Promise<ProductResponse> => {
   const res = await axios.get<ProductResponse>('http://localhost:3000/products', {
@@ -20,5 +20,18 @@ export const createProduct = async (product: Product) => {
 
 export const deleteProduct = async (id: string) => {
   const res = await axios.delete(`http://localhost:3000/products/${id}`)
+  return res.data
+}
+
+export const getProductById = async (id: string) => {
+  const res = await axios.get(`http://localhost:3000/products/${id}`)
+  return res.data
+}
+
+export const editProduct = async (id: string, data: ProductPayload) => {
+  const res = await axios.put(
+    `http://localhost:3000/products/${id}`,
+    data
+  )
   return res.data
 }

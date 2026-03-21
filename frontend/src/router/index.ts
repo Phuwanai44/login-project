@@ -10,6 +10,7 @@ import UserDashboard from '@/views/page/DashboardUser.vue'
 import ProfileDashboard from '@/views/page/DadhboardProfile.vue'
 import ProductDashboard from '@/views/page/ProductDashboard.vue'
 import ProductDashboardAdd from '@/views/page/ProductDashboardAdd.vue'
+import EditProduct from '@/views/page/EditProduct.vue'
 
 const routes = [
   {
@@ -77,6 +78,18 @@ const routes = [
       {
         path: '',
         component: ProductDashboardAdd,
+      },
+    ],
+  },
+
+  {
+    path: '/products/edit/:id',
+    component: DashboardLayout,
+    children: [
+      {
+        path: '',
+        name: 'EditProduct',
+        component: EditProduct,
       },
     ],
   },
