@@ -1,3 +1,9 @@
+<script setup lang="ts">
+import { useCartStore } from '@/stores/cart'
+
+const cartStore = useCartStore()
+</script>
+
 <template>
   <nav class="navbar glass-nav px-4 d-flex justify-content-between align-items-center">
     <!-- Left -->
@@ -7,7 +13,18 @@
     </div>
 
     <!-- Right -->
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-2 align-items-center">
+      <router-link to="/store" class="btn glass-nav-btn glass-nav-btn-outline me-2">
+        <i class="bi bi-shop me-1"></i> Store
+      </router-link>
+
+      <router-link to="/cart" class="btn glass-nav-btn glass-nav-btn-outline position-relative me-3">
+        <i class="bi bi-cart3 fs-5"></i>
+        <span v-if="cartStore.totalItems > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+          {{ cartStore.totalItems }}
+        </span>
+      </router-link>
+
       <router-link to="/login" class="btn glass-nav-btn glass-nav-btn-solid">
         Login
       </router-link>

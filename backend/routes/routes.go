@@ -18,6 +18,9 @@ func SetupRoutes(r *gin.Engine) {
 	{
 		auth.GET("/profile", controllers.GetProfile)
 		auth.PUT("/profile", controllers.UpdateProfile)
+		auth.POST("/orders", controllers.CreateOrder)
+		auth.GET("/orders", controllers.GetMyOrders)
+		auth.GET("/orders/:id", controllers.GetOrderById)
 	}
 
 	// admin routes
