@@ -10,51 +10,45 @@ const router = useRouter()
 
 const currentPage = ref(1)
 const totalPages = ref(1)
-
 const search = ref("")
 
 const loadProducts = async () => {
     loading.value = true
-
-    const res: ProductResponse = await getProducts(
-        currentPage.value,
-        search.value
-    )
-
-    products.value = res.data // ✅ ใช้ได้แล้ว
-    totalPages.value = res.totalPages // ✅ ใช้ได้แล้ว
-
-    loading.value = false
+    try {
+        const res: ProductResponse = await getProducts(
+            currentPage.value,
+            search.value
+        )
+        products.value = res.data
+        totalPages.value = res.totalPages
+    } catch (err) {
+        console.error(err)
+    } finally {
+        loading.value = false
+    }
 }
 
-// 👉 search
 const handleSearch = () => {
     currentPage.value = 1
     loadProducts()
 }
 
 const handleDelete = async (id: string) => {
-    const confirmDelete = confirm("คุณแน่ใจว่าจะลบสินค้านี้?")
+    const confirmDelete = confirm("Are you sure you want to delete this product?")
     if (!confirmDelete) return
 
     try {
         await deleteProduct(id)
-
-        // 🔥 ลบออกจาก UI ทันที
         products.value = products.value.filter(p => p.id !== id)
-
     } catch (err) {
         console.error(err)
     }
 }
 
 const handleEdit = (id: string) => {
-   console.log(products.value[0])
-    console.log('id =', id)
     router.push(`/products/edit/${id}`)
 }
 
-// 👉 pagination logic (แสดง 5 หน้า)
 const pagesToShow = computed(() => {
     const pages: number[] = []
     const maxVisible = 5
@@ -73,11 +67,9 @@ const pagesToShow = computed(() => {
     return pages
 })
 
-// ✅ แก้ error undefined
 const firstPage = computed(() => pagesToShow.value[0] ?? 0)
 const lastPage = computed(() => pagesToShow.value[pagesToShow.value.length - 1] ?? 0)
 
-// 👉 control
 const goToPage = (page: number) => {
     currentPage.value = page
     loadProducts()
@@ -103,68 +95,89 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="container mt-4">
+    <div class="products-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1 text-gradient">Products Inventory</h2>
+                <p class="text-muted small">Monitor storage stock, pricing, and distribution entries.</p>
+            </div>
+        </div>
 
-        <h2 class="mb-4">Products</h2>
-
-        <!-- Search -->
-        <div class="d-flex justify-content-between mb-3">
-            <div class="input-group" style="max-width:300px">
-                <input type="text" class="form-control" placeholder="Search product..." v-model="search"
-                    @input="handleSearch" />
+        <!-- Search & Control -->
+        <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
+            <div class="position-relative search-box-wrapper">
+                <i class="bi bi-search search-icon"></i>
+                <input type="text" class="form-control glass-input search-input" placeholder="Search products..." v-model="search" @input="handleSearch" />
             </div>
 
-            <router-link to="/add-products" class="btn btn-primary text-white">
-                Add Product
+            <router-link to="/add-products" class="btn glass-btn d-flex align-items-center gap-2">
+                <i class="bi bi-plus-lg"></i>
+                <span>Add Product</span>
             </router-link>
         </div>
 
         <!-- Table -->
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>Price</th>
-                            <th>Stock</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
+        <div class="glass-card mb-4">
+            <div class="card-header-glass px-4 py-3">
+                <h5 class="fw-bold mb-0">Product Listings</h5>
+            </div>
 
-                    <tbody>
-                        <tr v-if="loading">
-                            <td colspan="5" class="text-center">Loading...</td>
-                        </tr>
+            <div class="p-3">
+                <div v-if="loading" class="text-center py-5">
+                    <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
+                    <span class="text-muted small">Loading product catalogue...</span>
+                </div>
 
-                        <tr v-for="(product, index) in products" :key="product.id">
-                            <td>{{ index + 1 }}</td>
-                            <td>{{ product.name }}</td>
-                            <td>{{ product.price }}</td>
-                            <td>{{ product.stock }}</td>
-                            <td>
-                                <button class="btn btn-sm btn-warning me-2" @click="handleEdit(product.id)">
-                                    Edit
-                                </button>
-                                <button class="btn btn-sm btn-danger" @click="handleDelete(product.id)">
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div v-else class="table-responsive glass-table-container">
+                    <table class="glass-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-if="products.length === 0">
+                                <td colspan="5" class="text-center text-muted small py-4">
+                                    No products found in inventory
+                                </td>
+                            </tr>
+                            <tr v-for="(product, index) in products" :key="product.id">
+                                <td>{{ index + 1 }}</td>
+                                <td class="fw-semibold">{{ product.name }}</td>
+                                <td>
+                                    <span class="price-tag">${{ product.price }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge glass-badge" :class="product.stock > 0 ? 'glass-badge-success' : 'glass-badge-admin'">
+                                        {{ product.stock > 0 ? `${product.stock} In Stock` : 'Out of Stock' }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <button class="btn glass-btn-warning btn-sm me-2 py-1 px-3" @click="handleEdit(product.id)">
+                                        <i class="bi bi-pencil-fill me-1"></i>Edit
+                                    </button>
+                                    <button class="btn glass-btn-danger btn-sm py-1 px-3" @click="handleDelete(product.id)">
+                                        <i class="bi bi-trash-fill me-1"></i>Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
         <!-- Pagination -->
-        <nav class="mt-3">
-            <ul class="pagination">
-
+        <nav v-if="totalPages > 1" class="d-flex justify-content-center">
+            <ul class="pagination glass-pagination">
                 <!-- Prev -->
-                <li class="page-item">
-                    <button class="page-link" @click="prevPage" :disabled="currentPage === 1">
-                        Previous
+                <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                    <button class="page-link" @click="prevPage">
+                        <i class="bi bi-chevron-left"></i>
                     </button>
                 </li>
 
@@ -198,14 +211,47 @@ onMounted(() => {
                 </li>
 
                 <!-- Next -->
-                <li class="page-item">
-                    <button class="page-link" @click="nextPage" :disabled="currentPage === totalPages">
-                        Next
+                <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                    <button class="page-link" @click="nextPage">
+                        <i class="bi bi-chevron-right"></i>
                     </button>
                 </li>
-
             </ul>
         </nav>
-
     </div>
 </template>
+
+<style scoped>
+.products-content {
+    color: var(--text-primary);
+}
+
+.search-box-wrapper {
+    width: 100%;
+    max-width: 320px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    z-index: 5;
+}
+
+.search-input {
+    padding-left: 40px !important;
+    width: 100%;
+}
+
+.card-header-glass {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.price-tag {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+</style>
